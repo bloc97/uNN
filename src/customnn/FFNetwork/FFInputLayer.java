@@ -37,4 +37,14 @@ public class FFInputLayer extends FFLayer {
             throw new ArrayIndexOutOfBoundsException("Input size mismatch.");
         }
     }
+    @Override
+    public void updateWeights(double learningRate, double decay) {
+        throw new IllegalStateException("Do not update the weights of the first layer!");
+    }
+    @Override
+    public void clipWeights(double min, double max) {
+        for (FFNeuron neuron : neurons) {
+            neuron.clipWeights(min, max);
+        }
+    }
 }

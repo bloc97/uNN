@@ -5,6 +5,8 @@
  */
 package customnn.FFNetwork;
 
+import customnn.ActivationFunctions.ActivationType;
+
 /**
  *
  * @author bowen
@@ -42,24 +44,52 @@ public class FFNetwork {
         }
         outputLayer.setBiasNeuronWeights(d);
     }
-    public void randomiseWeightsUniform(double d) {
-        inputLayer.randomiseWeightsUniform(d);
+    public void randomiseBiasUniform(double min, double max) {
         for (FFLayer layer : hiddenLayers) {
-            layer.randomiseWeightsUniform(d);
+            layer.randomiseBiasUniform(min, max);
+        }
+        outputLayer.randomiseBiasUniform(min, max);
+    }
+    public void randomiseWeightsUniform(double d) {
+        inputLayer.randomiseWeightsUniform(-d, d);
+        for (FFLayer layer : hiddenLayers) {
+            layer.randomiseWeightsUniform(-d, d);
+        }
+    }
+    public void randomiseWeightsUniform(double min, double max) {
+        inputLayer.randomiseWeightsUniform(min, max);
+        for (FFLayer layer : hiddenLayers) {
+            layer.randomiseWeightsUniform(min, max);
         }
     }
     
-    public void foward() {
-        inputLayer.foward();
-        for (FFLayer layer : hiddenLayers) {
-            layer.foward();
-        }
-        outputLayer.foward();
-    }
-    public void setInput(double[] inputs) {
+    public double[] forward(double[] inputs, ActivationType type) {
         inputLayer.setInput(inputs);
-    }
-    public double[] getOutput() {
+        inputLayer.forward(type);
+        for (FFLayer layer : hiddenLayers) {
+            layer.forward(type);
+        }
+        outputLayer.forward(type);
         return outputLayer.getOutput();
+    }
+    public double backward(double[] expected, ActivationType type) {
+        double totalError = outputLayer.setExpected(expected, type);
+        outputLayer.backward(type);
+        for (int i=hiddenLayers.length-1; i>=0; i--) {
+            hiddenLayers[i].backward(type);
+        }
+        return totalError;
+    }
+    public void updateWeights(double learningRate, double decay) {
+        outputLayer.updateWeights(learningRate, decay);
+        for (int i=hiddenLayers.length-1; i>=0; i--) {
+            hiddenLayers[i].updateWeights(learningRate, decay);
+        }
+    }
+    public void clipWeights(double min, double max) {
+        inputLayer.clipWeights(min, max);
+        for (FFLayer layer : hiddenLayers) {
+            layer.clipWeights(min, max);
+        }
     }
 }

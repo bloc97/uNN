@@ -5,6 +5,8 @@
  */
 package customnn.FFNetwork;
 
+import customnn.ActivationFunctions;
+import customnn.ActivationFunctions.ActivationType;
 import customnn.Graph.GraphLink;
 import customnn.Graph.ListedNode;
 import java.util.LinkedList;
@@ -20,12 +22,19 @@ public class FFNeuron extends ListedNode {
     public FFNeuron() {
         super();
     }
-    public void randomiseWeightsUniform(double range) {
+    public void randomiseWeightsUniform(double min, double max) {
+        if (min > max) {
+            double temp = min;
+            min = max;
+            max = temp;
+        }
+        double range = Math.abs(max - min);
         for (GraphLink link : links) {
             FFConnection connection = (FFConnection)link;
             
             if (connection.isOutput(this)) {
-                connection.setWeight(Math.random() * range);
+                //System.out.println(Math.random() * range + min);
+                connection.setWeight(Math.random() * range + min);
             }
         }
     }
@@ -37,13 +46,8 @@ public class FFNeuron extends ListedNode {
         this.addLink(link);
         neuron.addLink(link);
     }
-    public static double nonLinear(double d) {
-        return d;
-    }
-    public static double nonLinearDerivative(double d) {
-        return 1;
-    }
-    public void foward() {
+    
+    public void forward(ActivationType type) {
         
         totalValue = 0;
         
@@ -56,7 +60,7 @@ public class FFNeuron extends ListedNode {
             
         }
         
-        totalValue = nonLinear(totalValue);
+        totalValue = ActivationFunctions.nonLinear(totalValue, type);
         
         for (GraphLink link : links) {
             FFConnection connection = (FFConnection)link;
@@ -68,18 +72,22 @@ public class FFNeuron extends ListedNode {
         }
     }
     
-    public void backward() {
+    public void backward(ActivationType type) {
         double totalError = 0;
         for (GraphLink link : links) {
             FFConnection connection = (FFConnection)link;
             
             if (connection.isOutput(this)) {
+                double weight = connection.getWeight();
+                if (Double.isInfinite(weight)) {
+                    throw new IllegalStateException("Infinite Weight!");
+                }
                 totalError += connection.getError() * connection.getWeight();
             }
             
         }
-        totalError = totalError * nonLinearDerivative(totalValue);
         
+        totalError = totalError * ActivationFunctions.nonLinearDerivative(totalValue, type);
         
         for (GraphLink link : links) {
             FFConnection connection = (FFConnection)link;
@@ -90,5 +98,43 @@ public class FFNeuron extends ListedNode {
             
         }
         
+    }
+    public void updateWeights(double learningRate, double decay) { //SGD
+        
+        for (GraphLink link : links) {
+            FFConnection connection = (FFConnection)link;
+            
+            if (!connection.isOutput(this)) {
+                double weight = connection.getWeight();
+                if (weight > 1) {
+                    connection.setWeight(decay * connection.getWeight() - (learningRate * connection.getError() * connection.getValue())); //Weight + lr * E * in
+                } else {
+                    connection.setWeight(connection.getWeight() - (learningRate * connection.getError() * connection.getValue())); //Weight + lr * E * in
+                }
+            }
+            
+        }
+    }
+    public void clipWeights(double min, double max) {
+        if (min > max) {
+            double temp = min;
+            min = max;
+            max = temp;
+        }
+        for (GraphLink link : links) {
+            FFConnection connection = (FFConnection)link;
+            
+            if (connection.isOutput(this)) {
+                double weight = connection.getWeight();
+                if (weight < min) {
+                    weight = min;
+                } else if (weight > max) {
+                    weight = max;
+                }
+                
+                connection.setWeight(weight);
+            }
+            
+        }
     }
 }

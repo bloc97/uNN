@@ -5,6 +5,7 @@
  */
 package customnn.FFNetwork;
 
+import customnn.ActivationFunctions.ActivationType;
 import java.util.LinkedList;
 
 /**
@@ -24,9 +25,19 @@ public class FFLayer {
             neurons.add(new FFNeuron());
         }
     }
-    public void foward() {
+    public void forward(ActivationType type) {
         for (FFNeuron neuron : neurons) {
-            neuron.foward();
+            neuron.forward(type);
+        }
+    }
+    public void backward(ActivationType type) {
+        for (FFNeuron neuron : neurons) {
+            neuron.backward(type);
+        }
+    }
+    public void updateWeights(double learningRate, double decay) {
+        for (FFNeuron neuron : neurons) {
+            neuron.updateWeights(learningRate, decay);
         }
     }
     public void addBias() {
@@ -46,14 +57,32 @@ public class FFLayer {
             }
         }
     }
-    public void randomiseWeightsUniform(double d) {
+    public void randomiseWeightsUniform(double min, double max) {
         for (FFNeuron neuron : neurons) {
-            neuron.randomiseWeightsUniform(d);
+            neuron.randomiseWeightsUniform(min, max);
         }
     }
     public void setBiasNeuronWeights(double d) {
         for (FFConnection connection : biasNeuron.getConnections()) {
             connection.setWeight(d);
         }
+    }
+    public void randomiseBiasUniform(double min, double max) {
+        if (min > max) {
+            double temp = min;
+            min = max;
+            max = temp;
+        }
+        double range = Math.abs(max - min);
+        
+        for (FFConnection connection : biasNeuron.getConnections()) {
+            connection.setWeight(Math.random() * range + min);
+        }
+    }
+    public void clipWeights(double min, double max) {
+        for (FFNeuron neuron : neurons) {
+            neuron.clipWeights(min, max);
+        }
+        biasNeuron.clipWeights(min, max);
     }
 }

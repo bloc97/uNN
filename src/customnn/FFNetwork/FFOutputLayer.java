@@ -5,6 +5,8 @@
  */
 package customnn.FFNetwork;
 
+import customnn.ActivationFunctions;
+import customnn.ActivationFunctions.ActivationType;
 import java.util.LinkedList;
 
 /**
@@ -35,8 +37,27 @@ public class FFOutputLayer extends FFLayer {
         }
         return output;
     }
+    
+    public double setExpected(double[] expected, ActivationType type) { //Using MSE
+        double totalError = 0;
+        if (expected.length == outputNodes.length) {
+            for (int i=0; i<expected.length; i++) {
+                double diff = expected[i] - outputNodes[i].getValue();
+                totalError += diff * diff;
+                outputNodes[i].setError(-(expected[i] - outputNodes[i].getValue()) * ActivationFunctions.nonLinearDerivative(expected[i], type));
+            }
+        } else {
+            throw new ArrayIndexOutOfBoundsException("Input size mismatch.");
+        }
+        return totalError * 0.5d;
+    }
+    
     @Override
-    public void randomiseWeightsUniform(double d) {
+    public void randomiseWeightsUniform(double min, double max) {
+        throw new IllegalStateException("Do not change the output layer weights!");
+    }
+    @Override
+    public void clipWeights(double min, double max) {
         throw new IllegalStateException("Do not change the output layer weights!");
     }
 }

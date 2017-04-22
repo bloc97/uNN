@@ -5,6 +5,8 @@
  */
 package customnn;
 
+import DotsGame.DotsMain;
+import customnn.ActivationFunctions.ActivationType;
 import customnn.FFNetwork.FFConnection;
 import customnn.FFNetwork.FFInputLayer;
 import customnn.FFNetwork.FFLayer;
@@ -14,6 +16,7 @@ import customnn.FFNetwork.FFOutputLayer;
 import customnn.Graph.GraphNode;
 import customnn.Graph.ListedNode;
 import java.util.Arrays;
+import java.util.LinkedList;
 
 /**
  *
@@ -25,37 +28,78 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
-        /*
-        FFInputLayer inputLayer = new FFInputLayer(2);
-        FFLayer l1 = new FFLayer(8);
-        FFOutputLayer outputLayer = new FFOutputLayer(1);
         
-        inputLayer.connect(l1);
-        l1.connect(outputLayer);
+        DotsMain.Main();
         
-        inputLayer.randomiseWeightsUniform(0.1d);
-        l1.randomiseWeightsUniform(0.1d);
+    }
+    public static void testNNxor() {
         
-        inputLayer.setInput(new double[] {2d,7d});
+        double learningRate = 0.01d;
+        ActivationType type = ActivationType.ELU;
         
         
-        inputLayer.foward();
-        l1.foward();
-        outputLayer.foward();
-        System.out.println(Arrays.toString(outputLayer.getOutput()));
-        */
-        
-        FFNetwork network = new FFNetwork(new int[]{2,8,3,1});
-        network.randomiseWeightsUniform(0.1d);
+        FFNetwork network = new FFNetwork(new int[]{2,10,10,10,1});
+        network.randomiseWeightsUniform(-1d, 1d);
         
         network.addBias();
-        network.setBiasNeuronWeights(0);
+        network.randomiseBiasUniform(-0.1d, 0.1d);
+        //network.setBiasNeuronWeights(0.1);
+        double[] input = new double[] {1d,1d};
+        double[] output = network.forward(input, type);
+        double[] expected;
+        double error;
         
-        network.setInput(new double[] {2,8});
-        network.foward();
         
-        System.out.println(Arrays.toString(network.getOutput()));
+        System.out.println(Arrays.toString(output));
+        
+        LinkedList<Double> pastError = new LinkedList<>();
+        
+        for (int i=0; i<100000; i++) {
+            double[][] rand = getRandomSample();
+            input = rand[0];
+            expected = rand[1];
+            output = network.forward(input, type);
+            error = network.backward(expected, type);
+            network.updateWeights(learningRate, 0.97d);
+            
+            pastError.addLast(error);
+            
+            if (pastError.size() > 10) {
+                pastError.removeFirst();
+            }
+            
+            double avgError = 0;
+            for (double thisErr : pastError) {
+                avgError += thisErr;
+            }
+            avgError /= pastError.size();
+            
+            
+            System.out.println(avgError);
+            if (avgError == 0 && pastError.size() > 2) {
+                break;
+            }
+        }
+        
+        System.out.println(Arrays.toString(network.forward(new double[] {1,1}, type)));
+        System.out.println(Arrays.toString(network.forward(new double[] {1,0}, type)));
+        System.out.println(Arrays.toString(network.forward(new double[] {0,1}, type)));
+        System.out.println(Arrays.toString(network.forward(new double[] {0,0}, type)));
+    }
+    public static double[][] getRandomSample() {
+        int choice = (int)(Math.random() * 4);
+        switch (choice) {
+            case 0:
+                return new double[][]{{1,1},{0}};
+            case 1:
+                return new double[][]{{1,0},{1}};
+            case 2:
+                return new double[][]{{0,1},{1}};
+            case 3:
+                return new double[][]{{0,0},{0}};
+            default:
+                throw new IllegalStateException("Error in random integer");
+        }
         
     }
     
