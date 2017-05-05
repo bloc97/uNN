@@ -54,6 +54,8 @@ public class GameView extends SceneSwing {
     private int spawnCounter = 0;
     private int spawnTop = 60;
     
+    private double[] lastEyes;
+    
     private double eProb = 0.5d;
     
     public GameView() {
@@ -69,7 +71,7 @@ public class GameView extends SceneSwing {
         agent = new Agent(20);
         agent.setX(500);
         agent.setY(500);
-        randomGenDots(100);
+        randomGenDots(120);
         //this.dObjects.add(agent);
         initialiseHandlers();
     }
@@ -83,8 +85,8 @@ public class GameView extends SceneSwing {
     
     protected void toggleLearning() {
         if (moveTop == 30) {
-            moveTop = 1;
-            eProb = 0.1d;
+            moveTop = 15;
+            eProb = 0.05d;
         } else {
             moveTop = 30;
             eProb = 0.5d;
@@ -210,6 +212,15 @@ public class GameView extends SceneSwing {
             return -1;
         }
     }
+    public double bound(double d) {
+        if (d > 0) {
+            return 1;
+        } else if (d < -1) {
+            return -1;
+        } else {
+            return d;
+        }
+    }
     public double[] randomDir() {
         int choice = (int)(Math.random() * 8);
         switch (choice) {
@@ -234,9 +245,26 @@ public class GameView extends SceneSwing {
         }
     }
     
+    protected boolean isEyeChange(double[] eyes) {
+        if (lastEyes == null) {
+            return true;
+        }
+        for (int i=0; i<eyes.length; i++) {
+            if (lastEyes[i] == 0 && (eyes[i] == 1 || eyes[i] == -1)) {
+                return true;
+            } else if (lastEyes[i] == -1 && eyes[i] == 1) {
+                return true;
+            } else if (lastEyes[i] == 1 && eyes[i] == -1) {
+                return true;
+            }
+        }
+        return false;
+        
+    }
+    
     protected void moveAgent(double[] eyes, double eProbability) {
         
-        if (moveCounter > moveTop) {
+        if (isEyeChange(eyes) || moveCounter > moveTop) {
             moveCounter = 0;
             
             if (Math.random() < eProbability) {
@@ -246,10 +274,11 @@ public class GameView extends SceneSwing {
                 lastY = rD[1]*10;
             } else {
                 double[] nD = agent.getMovement(eyes);
-                lastX = sign(nD[0])*10;
-                lastY = sign(nD[1])*10;
+                lastX = bound(nD[0])*10;
+                lastY = bound(nD[1])*10;
             }
         }
+        lastEyes = eyes;
         moveCounter++;
         
         agent.addX(lastX);
@@ -363,24 +392,24 @@ public class GameView extends SceneSwing {
         g2.setColor(Color.BLACK);
         g2.drawString("FPS: " + fpsCounter, 10, 20);
         
-        spawnFood();
+        //spawnFood();
         double[] eyes = checkNearFood();
         System.out.println(Arrays.toString(eyes));
         moveAgent(eyes, eProb);
         
         
         if (agent.x() > maxX) {
-            agent.setX(maxX);
+            agent.setX(maxX-100);
             agent.trainBad(eyes, sign(lastX), sign(lastY));
         } else if (agent.x() < 0) {
-            agent.setX(0);
+            agent.setX(0+100);
             agent.trainBad(eyes, sign(lastX), sign(lastY));
         }
         if (agent.y() > maxY) {
-            agent.setY(maxY);
+            agent.setY(maxY-100);
             agent.trainBad(eyes, sign(lastX), sign(lastY));
         } else if (agent.y() < 0) {
-            agent.setY(0);
+            agent.setY(0+100);
             agent.trainBad(eyes, sign(lastX), sign(lastY));
         }
         
@@ -396,6 +425,7 @@ public class GameView extends SceneSwing {
                     } else if (food instanceof BadFood) {
                         agent.trainBad(eyes, sign(lastX), sign(lastY));
                     }
+                    randomGenDots(1);
                 } else {
                     food.render(g2);
                 }

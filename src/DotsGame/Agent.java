@@ -31,12 +31,12 @@ public class Agent implements DisplayObject {
     double learningRate = 0.01d;
     ActivationFunctions.ActivationType type = ActivationFunctions.ActivationType.ARCTAN;
     
-    private FFNetwork network = new FFNetwork(new int[] {8, 16, 2});
+    private FFNetwork network = new FFNetwork(new int[] {8, 128, 64, 64, 32, 2});
     
     
     public Agent(double r) {
         this.r = r;
-        rv = 10*r;
+        rv = 6*r;
         rsqr = Math.sqrt((rv*rv)/2);
         color = Color.gray;
         x = 100;
@@ -49,19 +49,23 @@ public class Agent implements DisplayObject {
     
     public void trainBad(double[] eyes, double lastXSign, double lastYSign) {
         //System.out.println("Training Bad");
-        //trainGood(eyes, -lastXSign, -lastYSign);
+        train(eyes, -lastXSign, -lastYSign, 5);
         //System.out.println(Arrays.toString(network.forward(eyes, type)));
     }
     public void trainGood(double[] eyes, double lastXSign, double lastYSign) {
         //System.out.println("Training");
+        train(eyes, lastXSign, lastYSign, 50);
+    }
+    public void train(double[] eyes, double lastXSign, double lastYSign, int n) {
         double[] input = eyes;
         double[] expected = new double[] {lastXSign, lastYSign};
         
-        for (int i=0; i<1; i++) {
+        for (int i=0; i<n; i++) {
             System.out.println(Arrays.toString(network.forward(input, type)));
             network.backward(expected, type);
-            network.updateWeights(learningRate, 0.97d);
+            network.updateWeights(learningRate, 0.97d, 10d);
         }
+        
     }
     public double[] getMovement(double[] eyes) {
         return network.forward(eyes, type);

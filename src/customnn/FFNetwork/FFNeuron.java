@@ -99,17 +99,25 @@ public class FFNeuron extends ListedNode {
         }
         
     }
-    public void updateWeights(double learningRate, double decay) { //SGD
+    public void updateWeights(double learningRate, double decay, double gradientsClip) { //SGD
         
         for (GraphLink link : links) {
             FFConnection connection = (FFConnection)link;
             
             if (!connection.isOutput(this)) {
                 double weight = connection.getWeight();
-                if (weight > 1) {
-                    connection.setWeight(decay * connection.getWeight() - (learningRate * connection.getError() * connection.getValue())); //Weight + lr * E * in
+                
+                double grad = (learningRate * connection.getError() * connection.getValue());
+                if (grad < -gradientsClip) {
+                    grad = -gradientsClip;
+                } else if (grad > gradientsClip) {
+                    grad = gradientsClip;
+                }
+                
+                if (Math.abs(weight) > 1) {
+                    connection.setWeight(decay * connection.getWeight() - grad); //Weight + lr * E * in
                 } else {
-                    connection.setWeight(connection.getWeight() - (learningRate * connection.getError() * connection.getValue())); //Weight + lr * E * in
+                    connection.setWeight(connection.getWeight() - grad); //Weight + lr * E * in
                 }
             }
             

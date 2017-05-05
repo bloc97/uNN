@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package DotsGame;
+package TicTacToe;
 
+import DotsGame.*;
 import World2D.Scene;
 import World2D.Viewport;
 import java.awt.DisplayMode;
@@ -15,13 +16,13 @@ import java.awt.GraphicsEnvironment;
  *
  * @author bowen
  */
-public class DotsMain {
+public class TTTMain {
     public static void main() {
         
         int defaultW = 1200;
         int defaultH = 1000;
         //System.setProperty("sun.java2d.opengl","True");
-        Scene scene = new GameView(60, defaultW, defaultH);
+        Scene scene = new TView(30, defaultW, defaultH);
         //Scene scene = newGameViewSlick();
         Viewport viewport = new Viewport(defaultW, defaultH);
         viewport.setScene(scene);

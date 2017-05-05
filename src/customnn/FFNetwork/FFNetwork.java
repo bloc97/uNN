@@ -80,10 +80,10 @@ public class FFNetwork {
         }
         return totalError;
     }
-    public void updateWeights(double learningRate, double decay) {
-        outputLayer.updateWeights(learningRate, decay);
+    public void updateWeights(double learningRate, double decay, double gradientsClip) {
+        outputLayer.updateWeights(learningRate, decay, gradientsClip);
         for (int i=hiddenLayers.length-1; i>=0; i--) {
-            hiddenLayers[i].updateWeights(learningRate, decay);
+            hiddenLayers[i].updateWeights(learningRate, decay, gradientsClip);
         }
     }
     public void clipWeights(double min, double max) {

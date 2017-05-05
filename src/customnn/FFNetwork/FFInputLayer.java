@@ -38,7 +38,7 @@ public class FFInputLayer extends FFLayer {
         }
     }
     @Override
-    public void updateWeights(double learningRate, double decay) {
+    public void updateWeights(double learningRate, double decay, double gradientsClip) {
         throw new IllegalStateException("Do not update the weights of the first layer!");
     }
     @Override

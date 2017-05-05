@@ -35,9 +35,9 @@ public class FFLayer {
             neuron.backward(type);
         }
     }
-    public void updateWeights(double learningRate, double decay) {
+    public void updateWeights(double learningRate, double decay, double gradientsClip) {
         for (FFNeuron neuron : neurons) {
-            neuron.updateWeights(learningRate, decay);
+            neuron.updateWeights(learningRate, decay, gradientsClip);
         }
     }
     public void addBias() {
