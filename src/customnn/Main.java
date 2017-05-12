@@ -6,19 +6,9 @@
 package customnn;
 
 import customnn.ActivationFunctions.ActivationType;
-import customnn.FFNetwork.FFConnection;
-import customnn.FFNetwork.FFInputLayer;
-import customnn.FFNetwork.FFLayer;
 import customnn.FFNetwork.FFNetwork;
-import customnn.FFNetwork.FFNeuron;
-import customnn.FFNetwork.FFOutputLayer;
-import customnn.Graph.GraphNode;
-import customnn.Graph.ListedNode;
-import java.awt.BorderLayout;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  *

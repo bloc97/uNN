@@ -86,6 +86,12 @@ public class FFNetwork {
             hiddenLayers[i].updateWeights(learningRate, decay, gradientsClip);
         }
     }
+    public void updateWeights(double learningRate, double gradientsClip) {
+        outputLayer.updateWeights(learningRate, gradientsClip);
+        for (int i=hiddenLayers.length-1; i>=0; i--) {
+            hiddenLayers[i].updateWeights(learningRate, gradientsClip);
+        }
+    }
     public void clipWeights(double min, double max) {
         inputLayer.clipWeights(min, max);
         for (FFLayer layer : hiddenLayers) {
